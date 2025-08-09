@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple To Do List</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .container {
+      background: #fff;
+      padding: 32px 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      margin-top: 60px;
+      width: 350px;
+      max-width: 90vw;
+    }
+    h2 {
+      text-align: center;
+      color: #f76b1c;
+      margin-bottom: 24px;
+    }
+    #new-task {
+      width: 70%;
+      padding: 8px 12px;
+      border: 1px solid #f76b1c;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+      margin-right: 8px;
+      transition: border-color 0.2s;
+    }
+    #new-task:focus {
+      border-color: #fda085;
+    }
+    button {
+      background: #f76b1c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #fda085;
+    }
+    #todo-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+    #todo-list li {
+      background: #f9f9f9;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      font-size: 16px;
+      transition: box-shadow 0.2s, transform 0.4s;
+      animation: fadeUp 0.7s;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    #todo-list li button {
+      margin-left: 4px;
+      margin-top: 0;
+      flex-shrink: 0;
+      padding: 4px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      min-width: 60px;
+    }
+    #todo-list li.added {
+      animation: fadeUp 0.7s;
+    }
+    #todo-list li.fadeIn {
+      animation: fadeUp 0.7s;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounceIn {
+      0% { transform: scale(0.7); }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateX(100px); }
+    }
+    .task-done {
+      text-decoration: line-through;
+      color: #aaa;
+      transition: color 0.4s, text-decoration 0.4s;
+    }
+    .checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #f76b1c;
+      margin-right: 8px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .confetti {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    /* Dark mode styles */
+    body.dark-mode {
+      background: #121212;
+      color: #e0e0e0;
+    }
+    .container.dark-mode {
+      background: #1e1e1e;
+      color: #e0e0e0;
+    }
+    button {
+      background: #f76b1c;
+      color: #fff;
+    }
+    button:hover {
+      background: #fda085;
+    }
+    input, select {
+      background: #2c2c2c;
+      color: #e0e0e0;
+      border: 1px solid #444;
+    }
+    #search-bar {
+      background: #2c2c2c;
+      color: #e0e0e0;
+      border: 1px solid #444;
+    }
+    #sort-tasks {
+      background: #2c2c2c;
+      color: #e0e0e0;
+      border: 1px solid #444;
+    }
+    #progress-bar {
+      background: #333;
+    }
+    #progress {
+      background: #f76b1c;
+    }
+    /* Easter egg styles */
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #easter-egg {
+      animation: appear 0.8s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+      <canvas id="confetti-canvas" class="confetti"></canvas>
+      <div class="container">
+        <h2>To Do List</h2>
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+          <input id="new-task" type="text" placeholder="Add a new task">
+          <button onclick="addTask()" style="margin-left:8px;">Add</button>
+          <button id="menu-toggle" style="margin-left:8px;">☰</button>
+        </div>
+        <div id="dropdown-menu" style="display:none;flex-direction:column;gap:8px;margin-bottom:10px;">
+          <input id="new-date" type="date">
+          <select id="new-priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+          <select id="new-category">
+            <option value="General">General</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Other">Other</option>
+          </select>
+          <input id="search-bar" type="text" placeholder="Search tasks...">
+          <select id="sort-tasks">
+            <option value="date">Sort by Due Date</option>
+            <option value="priority">Sort by Priority</option>
+            <option value="category">Sort by Category</option>
+            <option value="status">Sort by Status</option>
+          </select>
+          <div id="progress-bar" style="width:100%;height:10px;background:#eee;border-radius:5px;overflow:hidden;"><div id="progress" style="height:100%;background:#f76b1c;width:0%;transition:width 0.4s;"></div></div>
+          <button id="dark-mode-toggle">Toggle Dark Mode</button>
+          <button id="clear-finished" style="width:100%;margin-top:12px;display:none;">Clear Finished Tasks</button>
+          <button id="export-csv">Export CSV</button>
+          <button id="import-csv">Import CSV</button>
+        </div>
+        <ul id="todo-list"></ul>
+        <div id="clear-btn-container" style="width:100%;display:flex;justify-content:center;"></div>
+        <div id="archive-section" style="margin-top:18px;display:none;"><h4>Archived Tasks</h4><ul id="archive-list"></ul></div>
+        <div id="quote" style="text-align:center;font-size:14px;color:#888;margin-top:18px;"></div>
+        <div id="easter-egg" style="text-align:center;font-size:12px;color:#f76b1c;opacity:0.2;margin-top:18px;user-select:none;">Made by Will K</div>
+      </div>
+
+  <script>
+    // Remove login/register logic and always show tasks
+    // Remove user-specific logic, use single localStorage key
+    function getTasksArr() {
+      return JSON.parse(localStorage.getItem('todoListFull') || '[]');
+    }
+    function saveTasksArr(tasks) {
+      localStorage.setItem('todoListFull', JSON.stringify(tasks));
+    }
+    function addTask() {
+      const text = document.getElementById('new-task').value.trim();
+      const date = document.getElementById('new-date') ? document.getElementById('new-date').value : '';
+      const priority = document.getElementById('new-priority') ? document.getElementById('new-priority').value : 'low';
+      const category = document.getElementById('new-category') ? document.getElementById('new-category').value : 'General';
+      if (text) {
+        const tasks = getTasksArr();
+        tasks.push({ text, date, priority, category, notes: '', starred: false, done: false, subtasks: [], recurring: false, archived: false });
+        saveTasksArr(tasks);
+        document.getElementById('new-task').value = '';
+        if (document.getElementById('new-date')) document.getElementById('new-date').value = '';
+        if (document.getElementById('new-priority')) document.getElementById('new-priority').value = 'low';
+        if (document.getElementById('new-category')) document.getElementById('new-category').value = 'General';
+        renderTasks();
+        renderArchive();
+      }
+    }
+    function renderTasks() {
+      let tasks = getTasksArr();
+      if (!Array.isArray(tasks)) {
+        tasks = [];
+        saveTasksArr(tasks);
+      }
+      // Filtering
+      const search = document.getElementById('search-bar') ? document.getElementById('search-bar').value.toLowerCase() : '';
+      if (search) tasks = tasks.filter(t => t.text && t.text.toLowerCase().includes(search) || (t.notes && t.notes.toLowerCase().includes(search)));
+      // Sorting
+      const sort = document.getElementById('sort-tasks') ? document.getElementById('sort-tasks').value : '';
+      if (sort === 'date') tasks.sort((a,b) => (a.date||'') > (b.date||'') ? 1 : -1);
+      if (sort === 'priority') tasks.sort((a,b) => ['low','medium','high'].indexOf(a.priority) - ['low','medium','high'].indexOf(b.priority));
+      if (sort === 'category') tasks.sort((a,b) => a.category.localeCompare(b.category));
+      if (sort === 'status') tasks.sort((a,b) => a.done - b.done);
+      // Render
+      const list = document.getElementById('todo-list');
+      list.innerHTML = '';
+      let doneCount = 0;
+      tasks.forEach((task, idx) => {
+        if (!task) return;
+        if (task.archived) return;
+        const li = document.createElement('li');
+        li.draggable = true;
+        li.ondragstart = e => { e.dataTransfer.setData('text/plain', idx); };
+        li.ondragover = e => e.preventDefault();
+        li.ondrop = e => {
+          const from = +e.dataTransfer.getData('text/plain');
+          const to = idx;
+          const arr = getTasksArr();
+          arr.splice(to, 0, arr.splice(from, 1)[0]);
+          saveTasksArr(arr);
+          renderTasks();
+        };
+        // Checkbox
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'checkbox';
+        checkbox.checked = !!task.done;
+        checkbox.addEventListener('change', function(e) {
+          e.stopPropagation();
+          const arr = getTasksArr();
+          arr[idx].done = this.checked;
+          saveTasksArr(arr);
+          renderTasks();
+        });
+        li.appendChild(checkbox);
+        // Star
+        const star = document.createElement('span');
+        star.textContent = task.starred ? '★' : '☆';
+        star.style.cursor = 'pointer';
+        star.style.marginRight = '8px';
+        star.onclick = function() {
+          const arr = getTasksArr();
+          arr[idx].starred = !arr[idx].starred;
+          saveTasksArr(arr);
+          renderTasks();
+        };
+        li.appendChild(star);
+        // Editable text
+        const span = document.createElement('span');
+        span.textContent = task.text || '';
+        span.contentEditable = true;
+        span.onblur = function() {
+          const arr = getTasksArr();
+          arr[idx].text = span.textContent;
+          saveTasksArr(arr);
+        };
+        if (task.done) span.classList.add('task-done');
+        li.appendChild(span);
+        // Due date
+        if (task.date) {
+          const dateSpan = document.createElement('span');
+          dateSpan.textContent = ' (' + task.date + ')';
+          dateSpan.style.marginLeft = '8px';
+          dateSpan.style.fontSize = '12px';
+          dateSpan.style.color = '#888';
+          li.appendChild(dateSpan);
+        }
+        // Priority
+        const prioSpan = document.createElement('span');
+        prioSpan.textContent = ' [' + task.priority + ']';
+        prioSpan.style.marginLeft = '8px';
+        prioSpan.style.fontSize = '12px';
+        prioSpan.style.color = task.priority === 'high' ? '#e74c3c' : (task.priority === 'medium' ? '#f76b1c' : '#27ae60');
+        li.appendChild(prioSpan);
+        // Category
+        const catSpan = document.createElement('span');
+        catSpan.textContent = ' {' + task.category + '}';
+        catSpan.style.marginLeft = '8px';
+        catSpan.style.fontSize = '12px';
+        catSpan.style.color = '#888';
+        li.appendChild(catSpan);
+        // Notes
+        const notesBtn = document.createElement('button');
+        notesBtn.textContent = 'Notes';
+        notesBtn.style.marginLeft = '4px';
+        notesBtn.style.marginTop = '0';
+        notesBtn.onclick = function(e) {
+          e.stopPropagation();
+          const arr = getTasksArr();
+          const note = prompt('Edit notes:', arr[idx].notes || '');
+          if (note !== null) {
+            arr[idx].notes = note;
+            saveTasksArr(arr);
+            renderTasks();
+          }
+        };
+        li.appendChild(notesBtn);
+        // Subtasks
+        const subBtn = document.createElement('button');
+        subBtn.textContent = 'Subtasks';
+        subBtn.style.marginLeft = '4px';
+        subBtn.style.marginTop = '0';
+        subBtn.onclick = function(e) {
+          e.stopPropagation();
+          const arr = getTasksArr();
+          let subs = arr[idx].subtasks || [];
+          let subText = subs.join('\n');
+          let newSubs = prompt('Edit subtasks (one per line):', subText);
+          if (newSubs !== null) {
+            arr[idx].subtasks = newSubs.split('\n').filter(s => s.trim());
+            saveTasksArr(arr);
+            renderTasks();
+          }
+        };
+        li.appendChild(subBtn);
+        // Archive
+        const archiveBtn = document.createElement('button');
+        archiveBtn.textContent = 'Archive';
+        archiveBtn.style.marginLeft = '4px';
+        archiveBtn.style.marginTop = '0';
+        archiveBtn.onclick = function(e) {
+          e.stopPropagation();
+          const arr = getTasksArr();
+          arr[idx].archived = true;
+          saveTasksArr(arr);
+          renderTasks();
+          renderArchive();
+        };
+        li.appendChild(archiveBtn);
+        // Recurring
+        if (task.recurring) {
+          const recurSpan = document.createElement('span');
+          recurSpan.textContent = ' 🔁';
+          recurSpan.style.marginLeft = '8px';
+          recurSpan.style.fontSize = '12px';
+          recurSpan.style.color = '#888';
+          li.appendChild(recurSpan);
+        }
+        list.appendChild(li);
+        if (task.done) doneCount++;
+      });
+      // Progress bar
+      const progress = document.getElementById('progress');
+      progress.style.width = tasks.length ? (doneCount/tasks.length*100)+'%' : '0%';
+      // Show clear button only at the end when all tasks are done
+      const clearBtnContainer = document.getElementById('clear-btn-container');
+      clearBtnContainer.innerHTML = '';
+      if (tasks.length && doneCount === tasks.length) {
+        const clearBtn = document.createElement('button');
+        clearBtn.id = 'clear-finished';
+        clearBtn.textContent = 'Clear Finished Tasks';
+        clearBtn.style.width = '90%';
+        clearBtn.style.marginTop = '16px';
+        clearBtn.onclick = function() {
+          localStorage.setItem('todoListFull', '[]');
+          renderTasks();
+          renderArchive();
+        };
+        clearBtnContainer.appendChild(clearBtn);
+        launchConfetti();
+      }
+    }
+    function renderArchive() {
+      const tasks = getTasksArr();
+      const arch = document.getElementById('archive-list');
+      arch.innerHTML = '';
+      let hasArch = false;
+      tasks.forEach(task => {
+        if (task.archived) {
+          hasArch = true;
+          const li = document.createElement('li');
+          li.textContent = task.text + (task.date ? ' ('+task.date+')' : '');
+          arch.appendChild(li);
+        }
+      });
+      document.getElementById('archive-section').style.display = hasArch ? 'block' : 'none';
+    }
+    // Dropdown menu toggle
+    document.getElementById('menu-toggle').onclick = function() {
+      const menu = document.getElementById('dropdown-menu');
+      menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+    };
+    // Fix button event listeners for dropdown menu
+    document.getElementById('dark-mode-toggle').onclick = function() {
+      document.body.classList.toggle('dark-mode');
+    };
+    document.getElementById('export-csv').onclick = exportTasksCSV;
+    document.getElementById('import-csv').onclick = importTasksCSV;
+    if (document.getElementById('search-bar')) document.getElementById('search-bar').oninput = renderTasks;
+    if (document.getElementById('sort-tasks')) document.getElementById('sort-tasks').onchange = renderTasks;
+    document.getElementById('clear-finished').onclick = function() {
+      localStorage.setItem('todoListFull', '[]');
+      renderTasks();
+      renderArchive();
+    };
+    // Confetti animation
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      let confetti = [];
+      for (let i = 0; i < 120; i++) {
+        confetti.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * -canvas.height,
+          r: Math.random() * 8 + 4,
+          d: Math.random() * 120 + 40,
+          color: `hsl(${Math.random()*360},90%,60%)`,
+          tilt: Math.random() * 10 - 5,
+          vy: Math.random() * 2 + 2,
+          vx: Math.random() * 2 - 1,
+          alpha: 1,
+          faded: false
+        });
+      }
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confetti.forEach(c => {
+          ctx.save();
+          ctx.globalAlpha = c.alpha;
+          ctx.translate(c.x, c.y);
+          ctx.rotate(c.tilt * Math.PI / 180);
+          ctx.beginPath();
+          ctx.arc(0, 0, c.r, 0, 2 * Math.PI);
+          ctx.fillStyle = c.color;
+          ctx.fill();
+          ctx.restore();
+        });
+        update();
+        frame++;
+        if (frame < 120 || confetti.some(c => c.alpha > 0.01)) {
+          requestAnimationFrame(draw);
+        } else {
+          setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 800);
+        }
+      }
+      function update() {
+        confetti.forEach(c => {
+          if (!c.faded) {
+            c.y += c.vy;
+            c.x += c.vx;
+            if (c.y > canvas.height - 10) {
+              c.faded = true;
+            }
+          }
+          if (c.faded && c.alpha > 0) {
+            c.alpha -= 0.04;
+            if (c.alpha < 0) c.alpha = 0;
+          }
+        });
+      }
+      draw();
+    }
+    // Always call renderTasks and renderArchive after DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      renderTasks();
+      renderArchive();
+    });
+  </script>
+</body>
+</html>
