@@ -1,4 +1,4 @@
-## My to do list - Hack Club - Summer of code project.
+## My To Do List - Hack Club - Summer of code project.
 ## Hiya ✌
 I made a To do list that you can run from your browser to your phone just download the files off GitHub or go to: [To-do-list-Summerofcode.tiinyhost.com](https://to-do-listsummerofmakingcode.tiiny.site)
 
