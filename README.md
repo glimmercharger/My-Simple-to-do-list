@@ -19,4 +19,4 @@ Making it so the Web App tasks syncs across your network (Maybe).
 # Thanks for reading,
 # Will K 
 # #SlayingEveryday💅 #BeYou 
--# (by the way if you find any bugs or spelling mistakes let me know by opening an issue on this resptory. Thannks!!)
+(by the way if you find any bugs or spelling mistakes let me know by opening an issue on this resptory. Thannks!!)
