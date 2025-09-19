@@ -13,7 +13,9 @@ As mentioned prevously you can save your tasks into a Exel Speadsheet document, 
 
 ## What I hope to do soon 💻
 Adding an app you can download on your iPhone or Android Phone.
+
 Adding a login system to save your tasks across the cloud.
+
 Making it so the Web App tasks syncs across your network (Maybe).
 
 ## Thanks for reading,
